@@ -1,9 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import {
-  ArrowDown, ArrowRight, Check, CheckCircle2, ChevronRight, CircleHelp,
-  Clock3, FileCheck2, LockKeyhole, Mic, RotateCcw, Send, Sparkles,
-  Square, Users, Video, X,
+  ArrowDown, ArrowRight, Check, CheckCircle2, ChevronRight,
+  Clock3, FileCheck2, LockKeyhole, Mic, RotateCcw, Send,
+  Square, Users, Video,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -24,7 +24,7 @@ export const Route = createFileRoute("/")({
   component: AssessmentApp,
 });
 
-type Screen = "welcome" | "overview" | "candidate" | "assessment" | "complete";
+type Screen = "introduction" | "assessment" | "complete";
 type RecordingState = "idle" | "preview" | "recording" | "review";
 
 const sections = ["Financial Management", "Compliance & Controls", "Leadership & Team Management", "Video Question"];
@@ -62,20 +62,18 @@ function Brand() {
   </Link>;
 }
 
-function Header({ onSupport }: { onSupport: () => void }) {
+function Header() {
   return <header className="mx-auto flex w-full max-w-6xl items-center justify-between px-5 py-6 lg:py-8">
     <Brand />
     <nav className="flex items-center gap-2" aria-label="Account navigation">
       <Button variant="ghost" className="hidden rounded-full sm:inline-flex" asChild><Link to="/login">Sign in</Link></Button>
-      <Button variant="soft" size="icon" className="lg:hidden" onClick={onSupport} aria-label="Open assessment support"><CircleHelp /></Button>
       <Button variant="pill" asChild><Link to="/create-account">Create account</Link></Button>
     </nav>
   </header>;
 }
 
 function AssessmentApp() {
-  const [screen, setScreen] = useState<Screen>("welcome");
-  const [supportOpen, setSupportOpen] = useState(false);
+  const [screen, setScreen] = useState<Screen>("introduction");
   const [section, setSection] = useState(0);
   const [seconds, setSeconds] = useState(300);
   const [submitted, setSubmitted] = useState<number[]>([]);
@@ -95,41 +93,39 @@ function AssessmentApp() {
   };
 
   return <div className="assessment-backdrop min-h-screen overflow-x-hidden text-foreground">
-    <Header onSupport={() => setSupportOpen(true)} />
-    {screen === "welcome" && <Welcome onBegin={() => goTo("overview")} />}
-    {screen === "overview" && <Overview onContinue={() => goTo("candidate")} />}
-    {screen === "candidate" && <CandidateForm onStart={() => goTo("assessment")} />}
-    {screen === "assessment" && <Assessment section={section} seconds={seconds} submitted={submitted} onSubmit={submitSection} onFinish={() => goTo("complete")} onSupport={() => setSupportOpen(true)} />}
+    <Header />
+    {screen === "introduction" && <Introduction onStart={() => goTo("assessment")} />}
+    {screen === "assessment" && <Assessment section={section} seconds={seconds} submitted={submitted} onSubmit={submitSection} onFinish={() => goTo("complete")} />}
     {screen === "complete" && <Complete />}
-    <SupportPanel open={supportOpen} onClose={() => setSupportOpen(false)} />
   </div>;
 }
 
-function Welcome({ onBegin }: { onBegin: () => void }) {
-  return <main className="mx-auto grid min-h-[calc(100vh-108px)] max-w-6xl items-center gap-10 px-5 pb-16 lg:grid-cols-12">
-    <section className="lg:col-span-7">
+function Introduction({ onStart }: { onStart: () => void }) {
+  const scrollToOverview = () => document.getElementById("assessment-overview")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  return <main>
+    <section className="mx-auto grid min-h-[calc(100vh-108px)] max-w-6xl items-center gap-10 px-5 pb-16 lg:grid-cols-12">
+      <div className="lg:col-span-7">
       <span className="inline-flex rounded-full border border-primary/20 bg-brand-soft px-3 py-1.5 text-xs font-semibold uppercase text-accent-foreground">Accounting Manager · 55 minutes</span>
       <h1 className="mt-6 max-w-3xl font-display text-5xl font-bold leading-[1.04] sm:text-6xl lg:text-7xl">Accounting Manager Assessment</h1>
       <p className="mt-6 max-w-xl text-lg leading-8 text-muted-foreground">Show us how you approach financial operations, safeguards, and people leadership. You’ll complete three short written sections and one recorded response.</p>
-      <Button variant="pill" size="lg" className="mt-8" onClick={onBegin}>Scroll to Begin <ArrowDown /></Button>
+      <Button variant="pill" size="lg" className="mt-8" onClick={scrollToOverview}>Scroll to Begin <ArrowDown /></Button>
       <div className="mt-10 flex flex-wrap gap-6 text-sm text-muted-foreground"><span className="flex items-center gap-2"><Clock3 className="text-primary" /> About 55 minutes</span><span className="flex items-center gap-2"><LockKeyhole className="text-primary" /> Private and secure</span></div>
-    </section>
-    <section className="glass-panel rounded-3xl p-6 lg:col-span-5" aria-label="Assessment sections">
+      </div>
+      <div className="glass-panel rounded-3xl p-6 lg:col-span-5" aria-label="Assessment sections">
       <div className="flex items-center justify-between"><h2 className="font-display text-xl font-semibold">Your assessment</h2><span className="rounded-full bg-brand-soft px-3 py-1 text-xs font-semibold text-accent-foreground">4 sections</span></div>
       <div className="mt-5 space-y-3">{sections.map((item, index) => <div key={item} className="flex items-center gap-3 rounded-2xl border border-border/70 bg-surface-strong p-4"><span className="grid size-10 shrink-0 place-items-center rounded-xl bg-brand-soft font-display font-bold text-accent-foreground">{index + 1}</span><div><p className="text-sm font-semibold">{item}</p><p className="mt-0.5 text-xs text-muted-foreground">{index === 3 ? "40 min · recorded response" : "5 min · 3 questions"}</p></div></div>)}</div>
+      </div>
     </section>
-  </main>;
-}
-
-function Overview({ onContinue }: { onContinue: () => void }) {
-  return <main className="mx-auto max-w-6xl px-5 pb-16 pt-6">
+    <section id="assessment-overview" className="mx-auto max-w-6xl scroll-mt-6 px-5 py-20">
     <div className="max-w-3xl"><p className="text-sm font-semibold text-primary">Before you begin</p><h1 className="mt-2 font-display text-4xl font-bold sm:text-5xl">Assessment overview</h1><p className="mt-4 text-lg text-muted-foreground">A quick look at the role and what this assessment covers.</p></div>
     <div className="mt-10 grid gap-5 md:grid-cols-3">
       <OverviewCard icon={<FileCheck2 />} title="Responsibilities" items={["Own monthly and quarterly close", "Deliver accurate reporting", "Improve accounting operations"]} />
       <OverviewCard icon={<CheckCircle2 />} title="Key requirements" items={["7+ years of accounting experience", "Strong GAAP knowledge", "Audit and controls expertise"]} />
       <OverviewCard icon={<Users />} title="Assessment summary" items={["3 written sections", "1 recorded video response", "Answers save while you work"]} />
     </div>
-    <div className="glass-panel mt-6 flex flex-col gap-5 rounded-3xl p-6 sm:flex-row sm:items-center sm:justify-between"><div><p className="font-semibold">Find a quiet place and close other tabs.</p><p className="mt-1 text-sm text-muted-foreground">Once a timed section begins, the timer cannot be paused.</p></div><Button variant="pill" size="lg" onClick={onContinue}>Continue <ArrowRight /></Button></div>
+    <div className="glass-panel mt-6 rounded-3xl p-6"><p className="font-semibold">Find a quiet place and close other tabs.</p><p className="mt-1 text-sm text-muted-foreground">Once a timed section begins, the timer cannot be paused.</p></div>
+    </section>
+    <CandidateForm onStart={onStart} />
   </main>;
 }
 
@@ -139,8 +135,8 @@ function OverviewCard({ icon, title, items }: { icon: React.ReactNode; title: st
 
 function CandidateForm({ onStart }: { onStart: () => void }) {
   const [agreed, setAgreed] = useState(false);
-  return <main className="mx-auto max-w-3xl px-5 pb-16 pt-6">
-    <div><p className="text-sm font-semibold text-primary">Step 2 of 2</p><h1 className="mt-2 font-display text-4xl font-bold">Candidate information</h1><p className="mt-3 text-muted-foreground">Confirm your details before the timer starts.</p></div>
+  return <section className="mx-auto max-w-3xl px-5 pb-24 pt-12">
+    <div><p className="text-sm font-semibold text-primary">Final step</p><h1 className="mt-2 font-display text-4xl font-bold">Candidate information</h1><p className="mt-3 text-muted-foreground">Confirm your details before the timer starts.</p></div>
     <form className="glass-panel mt-8 rounded-3xl p-6 sm:p-8" onSubmit={(event) => { event.preventDefault(); if (agreed) onStart(); }}>
       <div className="grid gap-5 sm:grid-cols-2">
         <Field label="First name"><Input required placeholder="Jordan" className="h-12 rounded-xl bg-surface-strong" /></Field>
@@ -155,18 +151,17 @@ function CandidateForm({ onStart }: { onStart: () => void }) {
       <label className="mt-7 flex cursor-pointer items-start gap-3 rounded-2xl bg-brand-soft p-4 text-sm leading-6"><Checkbox checked={agreed} onCheckedChange={(value) => setAgreed(value === true)} className="mt-1" /><span>I confirm these details are accurate and agree to complete this assessment independently.</span></label>
       <div className="mt-7 flex justify-end"><Button variant="pill" size="lg" type="submit" disabled={!agreed}>Start Assessment <ArrowRight /></Button></div>
     </form>
-  </main>;
+  </section>;
 }
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) { return <label className="grid gap-2 text-sm font-medium">{label}{children}</label>; }
 
-function Assessment({ section, seconds, submitted, onSubmit, onFinish, onSupport }: { section: number; seconds: number; submitted: number[]; onSubmit: () => void; onFinish: () => void; onSupport: () => void }) {
-  return <main className="mx-auto grid max-w-6xl gap-6 px-5 pb-16 pt-3 lg:grid-cols-12">
-    <div className="lg:col-span-8">
+function Assessment({ section, seconds, submitted, onSubmit, onFinish }: { section: number; seconds: number; submitted: number[]; onSubmit: () => void; onFinish: () => void }) {
+  return <main className="mx-auto max-w-4xl px-5 pb-16 pt-3">
+    <div>
       <Progress current={section} completed={submitted} />
       {section < 3 ? <WrittenSection section={section} seconds={seconds} onSubmit={onSubmit} /> : <VideoSection seconds={seconds} onFinish={onFinish} />}
     </div>
-    <div className="hidden lg:col-span-4 lg:block"><SupportCard onOpen={onSupport} /></div>
   </main>;
 }
 
@@ -207,9 +202,5 @@ function VideoSection({ seconds, onFinish }: { seconds: number; onFinish: () => 
     <Dialog open={error} onOpenChange={setError}><DialogContent className="rounded-3xl"><DialogHeader><DialogTitle>Camera or microphone blocked</DialogTitle><DialogDescription>Allow camera and microphone access in your browser settings, then try again.</DialogDescription></DialogHeader><ol className="space-y-2 rounded-2xl bg-muted p-4 text-sm text-muted-foreground"><li>1. Select the lock icon beside the web address.</li><li>2. Set Camera and Microphone to Allow.</li><li>3. Refresh the page and retry the device check.</li></ol><DialogFooter><Button variant="pill" onClick={() => setError(false)}>Got it</Button></DialogFooter></DialogContent></Dialog>
   </section>;
 }
-
-function SupportCard({ onOpen }: { onOpen: () => void }) { return <aside className="glass-panel sticky top-6 rounded-3xl p-6"><div className="flex items-center gap-3"><span className="grid size-9 place-items-center rounded-xl bg-brand-soft text-primary"><Sparkles /></span><div><h2 className="font-display font-semibold">Assessment Support</h2><p className="text-xs text-muted-foreground">AI-style help · Always available</p></div></div><div className="mt-5 space-y-3">{[["Can I pause a section?", "Timers run continuously once started."], ["Can I change an answer?", "You can edit until you submit that section."], ["Can I re-record?", "Yes, before your final submission."]].map(([q, a]) => <div key={q} className="rounded-2xl border border-border/70 bg-surface-strong p-4"><p className="text-sm font-semibold">{q}</p><p className="mt-1 text-xs leading-5 text-muted-foreground">{a}</p></div>)}</div><Button variant="soft" className="mt-5 w-full" onClick={onOpen}>Ask a question <ArrowRight /></Button></aside>; }
-
-function SupportPanel({ open, onClose }: { open: boolean; onClose: () => void }) { const [question, setQuestion] = useState(""); const [messages, setMessages] = useState<string[]>([]); const send = () => { if (!question.trim()) return; setMessages((m) => [...m, question]); setQuestion(""); }; return <div className={`fixed inset-0 z-50 ${open ? "pointer-events-auto" : "pointer-events-none"}`} aria-hidden={!open}><div onClick={onClose} className={`absolute inset-0 bg-foreground/20 transition-opacity ${open ? "opacity-100" : "opacity-0"}`} /><aside className={`absolute right-0 top-0 flex h-full w-full max-w-md flex-col bg-background p-6 shadow-2xl transition-transform duration-300 ${open ? "translate-x-0" : "translate-x-full"}`}><div className="flex items-center justify-between"><div><h2 className="font-display text-xl font-bold">Assessment Support</h2><p className="text-sm text-muted-foreground">Ask about format or technical issues.</p></div><Button variant="ghost" size="icon" onClick={onClose} aria-label="Close support"><X /></Button></div><div className="mt-8 flex-1 space-y-4 overflow-y-auto"><div className="max-w-[88%] rounded-2xl rounded-tl-sm bg-brand-soft p-4 text-sm leading-6">Hi! I can help with timing, submitting answers, or your camera and microphone.</div>{messages.map((message, i) => <div key={`${message}-${i}`} className="space-y-3"><div className="ml-auto max-w-[88%] rounded-2xl rounded-tr-sm bg-primary p-4 text-sm text-primary-foreground">{message}</div><div className="max-w-[88%] rounded-2xl rounded-tl-sm bg-brand-soft p-4 text-sm leading-6">You can keep working without losing your current answers. For device issues, check browser permissions and retry the camera preview.</div></div>)}</div><div className="flex gap-2 border-t border-border pt-4"><Input value={question} onChange={(e) => setQuestion(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") send(); }} placeholder="Ask a question…" className="h-11 rounded-full bg-surface-strong px-4" /><Button variant="pill" size="icon" onClick={send} aria-label="Send question"><Send /></Button></div></aside></div>; }
 
 function Complete() { return <main className="mx-auto grid min-h-[calc(100vh-110px)] max-w-2xl place-items-center px-5 pb-16"><div className="glass-panel w-full rounded-3xl p-8 text-center sm:p-12"><span className="mx-auto grid size-16 place-items-center rounded-full bg-brand-soft text-success"><Check className="size-8" /></span><h1 className="mt-6 font-display text-4xl font-bold">Assessment submitted</h1><p className="mx-auto mt-4 max-w-md leading-7 text-muted-foreground">Thank you for completing the Accounting Manager Assessment. The hiring team will review your responses and contact you with next steps.</p><Button variant="soft" className="mt-8" asChild><Link to="/login">Return to account</Link></Button></div></main>; }
