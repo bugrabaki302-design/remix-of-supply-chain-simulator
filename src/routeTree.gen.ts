@@ -9,21 +9,11 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as AssessmentRouteImport } from './routes/assessment'
 import { Route as CreateAccountRouteImport } from './routes/create-account'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as ApplyAssessmentIdIndexRouteImport } from './routes/apply.$assessmentId.index'
+import { Route as ApplyAssessmentIdSessionRouteImport } from './routes/apply.$assessmentId.session'
 
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AssessmentRoute = AssessmentRouteImport.update({
-  id: '/assessment',
-  path: '/assessment',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const CreateAccountRoute = CreateAccountRouteImport.update({
   id: '/create-account',
   path: '/create-account',
@@ -34,57 +24,67 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApplyAssessmentIdIndexRoute = ApplyAssessmentIdIndexRouteImport.update({
+  id: '/apply/$assessmentId/',
+  path: '/apply/$assessmentId/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApplyAssessmentIdSessionRoute =
+  ApplyAssessmentIdSessionRouteImport.update({
+    id: '/apply/$assessmentId/session',
+    path: '/apply/$assessmentId/session',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/assessment': typeof AssessmentRoute
   '/create-account': typeof CreateAccountRoute
   '/login': typeof LoginRoute
+  '/apply/$assessmentId/session': typeof ApplyAssessmentIdSessionRoute
+  '/apply/$assessmentId/': typeof ApplyAssessmentIdIndexRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/assessment': typeof AssessmentRoute
   '/create-account': typeof CreateAccountRoute
   '/login': typeof LoginRoute
+  '/apply/$assessmentId/session': typeof ApplyAssessmentIdSessionRoute
+  '/apply/$assessmentId': typeof ApplyAssessmentIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
-  '/assessment': typeof AssessmentRoute
   '/create-account': typeof CreateAccountRoute
   '/login': typeof LoginRoute
+  '/apply/$assessmentId/session': typeof ApplyAssessmentIdSessionRoute
+  '/apply/$assessmentId/': typeof ApplyAssessmentIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/assessment' | '/create-account' | '/login'
+  fullPaths:
+    | '/create-account'
+    | '/login'
+    | '/apply/$assessmentId/session'
+    | '/apply/$assessmentId/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/assessment' | '/create-account' | '/login'
-  id: '__root__' | '/' | '/assessment' | '/create-account' | '/login'
+  to:
+    | '/create-account'
+    | '/login'
+    | '/apply/$assessmentId/session'
+    | '/apply/$assessmentId'
+  id:
+    | '__root__'
+    | '/create-account'
+    | '/login'
+    | '/apply/$assessmentId/session'
+    | '/apply/$assessmentId/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
-  AssessmentRoute: typeof AssessmentRoute
   CreateAccountRoute: typeof CreateAccountRoute
   LoginRoute: typeof LoginRoute
+  ApplyAssessmentIdSessionRoute: typeof ApplyAssessmentIdSessionRoute
+  ApplyAssessmentIdIndexRoute: typeof ApplyAssessmentIdIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/assessment': {
-      id: '/assessment'
-      path: '/assessment'
-      fullPath: '/assessment'
-      preLoaderRoute: typeof AssessmentRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/create-account': {
       id: '/create-account'
       path: '/create-account'
@@ -99,14 +99,28 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/apply/$assessmentId/': {
+      id: '/apply/$assessmentId/'
+      path: '/apply/$assessmentId'
+      fullPath: '/apply/$assessmentId/'
+      preLoaderRoute: typeof ApplyAssessmentIdIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/apply/$assessmentId/session': {
+      id: '/apply/$assessmentId/session'
+      path: '/apply/$assessmentId/session'
+      fullPath: '/apply/$assessmentId/session'
+      preLoaderRoute: typeof ApplyAssessmentIdSessionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
-  AssessmentRoute: AssessmentRoute,
   CreateAccountRoute: CreateAccountRoute,
   LoginRoute: LoginRoute,
+  ApplyAssessmentIdSessionRoute: ApplyAssessmentIdSessionRoute,
+  ApplyAssessmentIdIndexRoute: ApplyAssessmentIdIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
