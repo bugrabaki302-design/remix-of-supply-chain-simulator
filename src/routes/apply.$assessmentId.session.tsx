@@ -122,7 +122,6 @@ function VideoSection({ content, seconds }: { content: VideoData; seconds: numbe
         <span className="pointer-events-none absolute bottom-3 left-3 size-5 rounded-bl-md border-b-2 border-l-2 border-primary-foreground/60" />
         <span className="pointer-events-none absolute bottom-3 right-3 size-5 rounded-br-md border-b-2 border-r-2 border-primary-foreground/60" />
         {!opened && <Button variant="outline" size="lg" className="z-10" onClick={() => setOpened(true)}><Video /> Open Video recorder</Button>}
-        {opened && !checking && <span className="absolute left-4 top-4 flex items-center gap-2 rounded-full bg-destructive px-3 py-1 text-xs font-bold uppercase tracking-wide text-destructive-foreground"><span className="size-2 rounded-full bg-destructive-foreground recording-dot" /> Rec</span>}
         {checking && <div className="absolute inset-0 grid place-items-center bg-foreground/90 text-center text-primary-foreground"><div><LoaderCircle className="mx-auto size-10 animate-spin" /><p className="mt-4 font-semibold">Checking camera and microphone…</p><p className="mt-1 text-xs opacity-70">This may take a few seconds</p></div></div>}
       </div>
       {opened && !checking && <div className="mt-4 flex justify-center"><Button variant="outline" size="lg" disabled={checking} onClick={requestCamera}><Video /> Start Recording</Button></div>}
