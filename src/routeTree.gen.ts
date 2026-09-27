@@ -9,11 +9,17 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as IndexRouteImport } from './routes/index'
 import { Route as CreateAccountRouteImport } from './routes/create-account'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ApplyAssessmentIdIndexRouteImport } from './routes/apply.$assessmentId.index'
 import { Route as ApplyAssessmentIdSessionRouteImport } from './routes/apply.$assessmentId.session'
 
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CreateAccountRoute = CreateAccountRouteImport.update({
   id: '/create-account',
   path: '/create-account',
@@ -37,12 +43,14 @@ const ApplyAssessmentIdSessionRoute =
   } as any)
 
 export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
   '/create-account': typeof CreateAccountRoute
   '/login': typeof LoginRoute
   '/apply/$assessmentId/session': typeof ApplyAssessmentIdSessionRoute
   '/apply/$assessmentId/': typeof ApplyAssessmentIdIndexRoute
 }
 export interface FileRoutesByTo {
+  '/': typeof IndexRoute
   '/create-account': typeof CreateAccountRoute
   '/login': typeof LoginRoute
   '/apply/$assessmentId/session': typeof ApplyAssessmentIdSessionRoute
@@ -50,6 +58,7 @@ export interface FileRoutesByTo {
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
   '/create-account': typeof CreateAccountRoute
   '/login': typeof LoginRoute
   '/apply/$assessmentId/session': typeof ApplyAssessmentIdSessionRoute
@@ -58,18 +67,21 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
+    | '/'
     | '/create-account'
     | '/login'
     | '/apply/$assessmentId/session'
     | '/apply/$assessmentId/'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/'
     | '/create-account'
     | '/login'
     | '/apply/$assessmentId/session'
     | '/apply/$assessmentId'
   id:
     | '__root__'
+    | '/'
     | '/create-account'
     | '/login'
     | '/apply/$assessmentId/session'
@@ -77,6 +89,7 @@ export interface FileRouteTypes {
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
   CreateAccountRoute: typeof CreateAccountRoute
   LoginRoute: typeof LoginRoute
   ApplyAssessmentIdSessionRoute: typeof ApplyAssessmentIdSessionRoute
@@ -85,6 +98,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/create-account': {
       id: '/create-account'
       path: '/create-account'
@@ -117,6 +137,7 @@ declare module '@tanstack/react-router' {
 }
 
 const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
   CreateAccountRoute: CreateAccountRoute,
   LoginRoute: LoginRoute,
   ApplyAssessmentIdSessionRoute: ApplyAssessmentIdSessionRoute,
