@@ -72,7 +72,7 @@ function Assessment({ assessment, section, seconds, submitted, onSubmit }: { ass
     <div>
       <Progress assessment={assessment} current={section} completed={submitted} />
       {current?.kind === "written" && <WrittenSection key={section} content={current} index={section} seconds={seconds} onSubmit={onSubmit} />}
-      {current?.kind === "video" && <VideoSection key={section} content={current} isFinal={section === assessment.sections.length - 1} seconds={seconds} onFinish={() => onSubmit()} />}
+      {current?.kind === "video" && <VideoSection key={section} content={current} seconds={seconds} />}
     </div>
   </main>;
 }
@@ -95,7 +95,7 @@ function WrittenSection({ content, index, seconds, onSubmit }: { content: Writte
   </form>;
 }
 
-function VideoSection({ content, isFinal, seconds, onFinish }: { content: VideoData; isFinal: boolean; seconds: number; onFinish: () => void }) {
+function VideoSection({ content, seconds }: { content: VideoData; seconds: number }) {
   const [opened, setOpened] = useState(false); const [error, setError] = useState(false); const [checking, setChecking] = useState(false); const [copied, setCopied] = useState(false); const checkTimerRef = useRef<number | null>(null);
   const requestCamera = () => {
     setChecking(true);
@@ -113,11 +113,11 @@ function VideoSection({ content, isFinal, seconds, onFinish }: { content: VideoD
     if (checkTimerRef.current !== null) window.clearTimeout(checkTimerRef.current);
   }, []);
   return <section className="glass-panel mt-6 rounded-3xl p-6 sm:p-8">
-    <div className="flex items-start justify-between gap-4"><div><p className="text-xs font-semibold uppercase text-primary">{isFinal ? "Final section" : "Video section"}</p><h1 className="mt-1 font-display text-2xl font-bold sm:text-3xl">{content.title}</h1></div><Timer seconds={seconds} /></div>
+    <div className="flex items-start justify-between gap-4"><div><p className="text-xs font-semibold uppercase text-primary">Video section</p><h1 className="mt-1 font-display text-2xl font-bold sm:text-3xl">{content.title}</h1></div><Timer seconds={seconds} /></div>
     <div className="mt-7 rounded-2xl bg-brand-soft p-5"><p className="text-sm font-semibold text-accent-foreground">Your prompt</p><p className="mt-2 text-lg font-medium leading-7">{content.prompt}</p></div>
     <div className="relative mt-5 flex aspect-video min-h-48 items-center justify-center overflow-hidden rounded-2xl bg-foreground p-4">
       {!opened && <Button variant="outline" size="lg" className="z-10" onClick={() => setOpened(true)}><Video /> Open Video recorder</Button>}
-      {opened && <><div className="text-center text-primary-foreground"><Video className="mx-auto size-10 opacity-70" /><p className="mt-3 text-sm font-medium">Camera preview will appear here</p></div><Button variant="destructive" size="lg" className="absolute bottom-4 left-1/2 -translate-x-1/2 whitespace-nowrap" disabled={checking} onClick={requestCamera}><span className="size-2.5 rounded-full bg-destructive-foreground recording-dot" /> Start Recording</Button></>}
+      {opened && <><div className="-translate-y-6 text-center text-primary-foreground"><Video className="mx-auto size-10 opacity-70" /><p className="mt-3 text-sm font-medium">Camera preview will appear here</p></div><Button variant="destructive" size="lg" className="absolute bottom-4 left-1/2 -translate-x-1/2 whitespace-nowrap" disabled={checking} onClick={requestCamera}><span className="size-2.5 rounded-full bg-destructive-foreground recording-dot" /> Start Recording</Button></>}
       {checking && <div className="absolute inset-0 grid place-items-center bg-foreground/90 text-center text-primary-foreground"><div><LoaderCircle className="mx-auto size-10 animate-spin" /><p className="mt-4 font-semibold">Checking camera and microphone…</p><p className="mt-1 text-xs opacity-70">This may take a few seconds</p></div></div>}
     </div>
     <div className="mt-5 flex items-center gap-2 text-sm text-muted-foreground"><Mic className="size-4" /> Camera and microphone required</div>
