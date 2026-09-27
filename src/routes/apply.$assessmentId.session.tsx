@@ -1,7 +1,7 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import {
-  Check, CheckCircle2, ChevronRight, Clipboard, LoaderCircle, Mic, RotateCcw, Send, Square, Video,
+  Check, ChevronRight, Clipboard, LoaderCircle, Mic, Video,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -33,7 +33,6 @@ export const Route = createFileRoute("/apply/$assessmentId/session")({
   component: AssessmentPage,
 });
 
-type RecordingState = "idle" | "preview" | "recording" | "review";
 type Stage = "sections" | "complete";
 
 function AssessmentPage() {
@@ -73,7 +72,7 @@ function Assessment({ assessment, section, seconds, submitted, onSubmit }: { ass
     <div>
       <Progress assessment={assessment} current={section} completed={submitted} />
       {current?.kind === "written" && <WrittenSection key={section} content={current} index={section} seconds={seconds} onSubmit={onSubmit} />}
-      {current?.kind === "video" && <VideoSection key={section} content={current} isFinal={section === assessment.sections.length - 1} seconds={seconds} onFinish={() => onSubmit()} />}
+      {current?.kind === "video" && <VideoSection key={section} content={current} seconds={seconds} />}
     </div>
   </main>;
 }
@@ -96,8 +95,8 @@ function WrittenSection({ content, index, seconds, onSubmit }: { content: Writte
   </form>;
 }
 
-function VideoSection({ content, isFinal, seconds, onFinish }: { content: VideoData; isFinal: boolean; seconds: number; onFinish: () => void }) {
-  const [state, setState] = useState<RecordingState>("idle"); const [error, setError] = useState(false); const [checking, setChecking] = useState(false); const [copied, setCopied] = useState(false); const videoRef = useRef<HTMLVideoElement>(null); const streamRef = useRef<MediaStream | null>(null); const checkTimerRef = useRef<number | null>(null);
+function VideoSection({ content, seconds }: { content: VideoData; seconds: number }) {
+  const [opened, setOpened] = useState(false); const [error, setError] = useState(false); const [checking, setChecking] = useState(false); const [copied, setCopied] = useState(false); const checkTimerRef = useRef<number | null>(null);
   const requestCamera = () => {
     setChecking(true);
     checkTimerRef.current = window.setTimeout(() => {
@@ -110,23 +109,18 @@ function VideoSection({ content, isFinal, seconds, onFinish }: { content: VideoD
     setCopied(true);
     window.setTimeout(() => setCopied(false), 1800);
   };
-  const startRecording = () => setState("recording");
-  const stopRecording = () => { setState("review"); streamRef.current?.getTracks().forEach((track) => track.stop()); };
   useEffect(() => () => {
-    streamRef.current?.getTracks().forEach((track) => track.stop());
     if (checkTimerRef.current !== null) window.clearTimeout(checkTimerRef.current);
   }, []);
   return <section className="glass-panel mt-6 rounded-3xl p-6 sm:p-8">
-    <div className="flex items-start justify-between gap-4"><div><p className="text-xs font-semibold uppercase text-primary">{isFinal ? "Final section" : "Video section"}</p><h1 className="mt-1 font-display text-2xl font-bold sm:text-3xl">{content.title}</h1></div><Timer seconds={seconds} /></div>
+    <div className="flex items-start justify-between gap-4"><div><p className="text-xs font-semibold uppercase text-primary">Video section</p><h1 className="mt-1 font-display text-2xl font-bold sm:text-3xl">{content.title}</h1></div><Timer seconds={seconds} /></div>
     <div className="mt-7 rounded-2xl bg-brand-soft p-5"><p className="text-sm font-semibold text-accent-foreground">Your prompt</p><p className="mt-2 text-lg font-medium leading-7">{content.prompt}</p></div>
-    <div className="relative mt-5 aspect-video overflow-hidden rounded-2xl bg-foreground">
-      <video ref={videoRef} autoPlay muted playsInline className={`size-full object-cover ${state === "idle" || state === "review" ? "hidden" : "block"}`} />
-      {state === "idle" && <div className="grid size-full place-items-center text-center text-primary-foreground"><div><Video className="mx-auto size-10 opacity-70" /><p className="mt-3 text-sm font-medium">Camera preview will appear here</p></div></div>}
+    <div className="relative mt-5 flex aspect-video min-h-48 items-center justify-center overflow-hidden rounded-2xl bg-foreground p-4">
+      {!opened && <Button variant="outline" size="lg" className="z-10" onClick={() => setOpened(true)}><Video /> Open Video recorder</Button>}
+      {opened && <><div className="-translate-y-6 text-center text-primary-foreground"><Video className="mx-auto size-10 opacity-70" /><p className="mt-3 text-sm font-medium">Camera preview will appear here</p></div><Button variant="destructive" size="lg" className="absolute bottom-4 left-1/2 -translate-x-1/2 whitespace-nowrap" disabled={checking} onClick={requestCamera}><span className="size-2.5 rounded-full bg-destructive-foreground recording-dot" /> Start Recording</Button></>}
       {checking && <div className="absolute inset-0 grid place-items-center bg-foreground/90 text-center text-primary-foreground"><div><LoaderCircle className="mx-auto size-10 animate-spin" /><p className="mt-4 font-semibold">Checking camera and microphone…</p><p className="mt-1 text-xs opacity-70">This may take a few seconds</p></div></div>}
-      {state === "recording" && <span className="absolute left-4 top-4 flex items-center gap-2 rounded-full bg-destructive px-3 py-1.5 text-xs font-semibold text-destructive-foreground"><span className="size-2 rounded-full bg-destructive-foreground recording-dot" /> Recording</span>}
-      {state === "review" && <div className="grid size-full place-items-center text-center text-primary-foreground"><div><CheckCircle2 className="mx-auto size-10 text-success" /><p className="mt-3 font-semibold">Recording ready to review</p><p className="mt-1 text-xs opacity-70">Mock preview complete</p></div></div>}
     </div>
-    <div className="mt-5 flex flex-wrap items-center justify-between gap-3"><span className="flex items-center gap-2 text-sm text-muted-foreground"><Mic className="size-4" /> Camera and microphone required</span><div className="flex gap-2">{state === "idle" && <Button variant="pill" onClick={requestCamera}>Enable camera</Button>}{state === "preview" && <Button variant="pill" onClick={startRecording}><Video /> Start Recording</Button>}{state === "recording" && <Button variant="pill" onClick={stopRecording}><Square /> Stop Recording</Button>}{state === "review" && <><Button variant="soft" onClick={() => setState("idle")}><RotateCcw /> Re-record</Button><Button variant="pill" onClick={onFinish}>{isFinal ? "Final Submit" : "Submit Section"} <Send /></Button></>}</div></div>
+    <div className="mt-5 flex items-center gap-2 text-sm text-muted-foreground"><Mic className="size-4" /> Camera and microphone required</div>
     <Dialog open={error} onOpenChange={setError}><DialogContent className="max-h-[90vh] overflow-y-auto rounded-2xl sm:max-w-2xl"><DialogHeader><DialogTitle className="pr-8 text-xl">Access to your camera or microphone is currently blocked.</DialogTitle><DialogDescription className="leading-6">There&apos;s a rare condition in the Windows camera discovery cache. Concurrent access by multiple processes or threads might result in unexpected behavior.</DialogDescription></DialogHeader><ul className="space-y-2 border-b border-border pb-5 text-sm text-muted-foreground"><li>• Devices may not show correctly, or the cache might contain invalid data.</li><li>• Cameras might not appear, or detection might fail when multiple devices are connected.</li><li>• Some cameras could appear more than once or not be detected at all.</li></ul><div className="space-y-4"><h3 className="font-display text-base font-bold">Solution:</h3><div><p className="text-sm font-semibold">1. Open Powershell or Command Prompt on Windows as Administrator</p><ul className="mt-2 space-y-1 text-sm text-muted-foreground"><li>• Press Windows Key + X</li><li>• Press A</li></ul></div><div><p className="text-sm font-semibold">2. Update Camera drivers on Windows</p><p className="mt-2 text-sm text-muted-foreground">Copy and paste the following command into Powershell or Command Prompt, then press Enter.</p><p className="mt-4 text-xs font-semibold uppercase text-muted-foreground">Powershell command</p><Button type="button" variant="outline" className="mt-2 w-full justify-center" onClick={copyCommand}><Clipboard /> {copied ? "Command copied" : "Click here to copy the command"}</Button></div></div><DialogFooter className="mt-2"><Button variant="pill" onClick={() => setError(false)}>Close</Button></DialogFooter></DialogContent></Dialog>
   </section>;
 }
