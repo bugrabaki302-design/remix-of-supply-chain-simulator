@@ -10,10 +10,6 @@ import {
 import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
-import { ControlProvider } from "@/components/ct/ControlProvider";
-import { AppShell } from "@/components/ct/AppShell";
-import { THEME_BOOTSTRAP } from "@/components/ct/ThemeToggle";
-
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
 function NotFoundComponent() {
@@ -81,21 +77,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Shipping & logistics simulator | Meridian Freight" },
-      {
-        name: "description",
-        content:
-          "Flip port delays, supplier outages, demand spikes and tariff changes on a live inbound freight network map, and watch on-time delivery, landed cost and projected stockouts move.",
-      },
-      { name: "author", content: "Meridian Freight & Fulfillment" },
+      { title: "PAXOS Assessments" },
+      { name: "description", content: "A focused, candidate-friendly assessment experience." },
+      { name: "author", content: "PAXOS" },
+      { property: "og:title", content: "PAXOS Assessments" },
+      { property: "og:description", content: "A focused, candidate-friendly assessment experience." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { property: "og:title", content: "Shipping & logistics simulator | Meridian Freight" },
-      { name: "twitter:title", content: "Shipping & logistics simulator | Meridian Freight" },
-      { property: "og:description", content: "Flip port delays, supplier outages, demand spikes and tariff changes on a live inbound freight network map, and watch on-time delivery, landed cost and projected stockouts move." },
-      { name: "twitter:description", content: "Flip port delays, supplier outages, demand spikes and tariff changes on a live inbound freight network map, and watch on-time delivery, landed cost and projected stockouts move." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/99471f6b-fed3-4ea3-9d20-d213bd51d00f/id-preview-78dcc4db--29119b76-856d-4efe-ac94-26907fda2580.lovable.app-1785494942923.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/99471f6b-fed3-4ea3-9d20-d213bd51d00f/id-preview-78dcc4db--29119b76-856d-4efe-ac94-26907fda2580.lovable.app-1785494942923.png" },
+      { name: "twitter:site", content: "@Lovable" },
     ],
     links: [
       {
@@ -103,11 +92,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         href: appCss,
       },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
-      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "" },
-      {
-        rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap",
-      },
+      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
+      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" },
       { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
     ],
   }),
@@ -119,9 +105,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" className="dark" suppressHydrationWarning>
+    <html lang="en">
       <head>
-        <script dangerouslySetInnerHTML={{ __html: THEME_BOOTSTRAP }} />
         <HeadContent />
       </head>
       <body>
@@ -132,19 +117,13 @@ function RootShell({ children }: { children: ReactNode }) {
   );
 }
 
-
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ControlProvider>
-        <AppShell>
-          {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-          <Outlet />
-        </AppShell>
-      </ControlProvider>
+      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+      <Outlet />
     </QueryClientProvider>
-
   );
 }
